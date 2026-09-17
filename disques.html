@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Méthode des disques</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff; --ink: #1a1a1a; --muted: #666666; --rule: #d9d9d9;
+    --light: #BFDCF5; --med: #5FA8E0; --dark: #1F5F9F; --orange: #F28C28; --line: #000000;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #ffffff; --ink: #1a1a1a; --muted: #666666; --rule: #d9d9d9; --line: #000000; }
+  }
+  :root[data-theme="dark"] { --bg: #ffffff; --ink: #1a1a1a; --muted: #666666; --rule: #d9d9d9; --line: #000000; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); }
+  body { font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif; font-size: 18px; line-height: 1.45; }
+  main { max-width: 1120px; margin: 0 auto; padding: 32px 20px 56px; }
+  nav { font-size: 0.95rem; color: var(--muted); margin-bottom: 18px; }
+  nav a { color: var(--dark); text-decoration: none; }
+  nav a:hover { text-decoration: underline; }
+  h1 { font-weight: 600; font-size: 1.75rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .lead { margin: 0 0 24px; color: var(--muted); max-width: 62ch; }
+  figure { margin: 0; }
+  svg { display: block; width: 100%; height: auto; }
+  svg text { font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif; font-size: 0.22px; fill: var(--ink); }
+  svg text.halo { paint-order: stroke; stroke: var(--bg); stroke-width: 0.07px; stroke-linejoin: round; }
+  .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px 40px;
+    margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--rule); max-width: 720px; }
+  label { display: block; }
+  label span { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  label span em { font-style: normal; }
+  label span output { font-variant-numeric: tabular-nums; color: var(--muted); }
+  input[type=range] { width: 100%; accent-color: var(--orange); }
+  input[type=range]:focus-visible { outline: 2px solid var(--dark); outline-offset: 4px; }
+  .formula { margin: 22px 0 0; font-size: 1.05rem; max-width: 62ch; }
+  .formula .v { font-variant-numeric: tabular-nums; }
+  footer { margin-top: 36px; font-size: 0.9rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <nav><a href="index.html">Volumes de révolution</a> · <a href="coquilles.html">Méthode des coquilles</a> · Méthode des disques</nav>
+  <h1>Méthode des disques</h1>
+  <p class="lead">La même région bleue tourne cette fois autour de l'axe <i>x</i>. La bande orange de largeur <i>dx</i>, perpendiculaire à l'axe, devient un disque plein de rayon <i>f(x)</i> et d'épaisseur <i>dx</i>. Le solide peut être ouvert jusqu'à 90° pour laisser voir l'intérieur ; la géométrie reste celle de la rotation complète.</p>
+
+  <figure>
+    <svg id="fig" viewBox="-3.6 -3.4 14.8 6.3" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Région plane à gauche, solide de révolution autour de l'axe x avec disque à droite"></svg>
+  </figure>
+
+  <div class="controls">
+    <label><span><em>Position <i>x</i> de la bande</em> <output id="ox"></output></span>
+      <input id="sx" type="range" min="1.00" max="2.70" step="0.01" value="1.70"></label>
+    <label><span><em>Épaisseur <i>dx</i></em> <output id="odx"></output></span>
+      <input id="sdx" type="range" min="0.05" max="0.60" step="0.01" value="0.22"></label>
+    <label><span><em>Ouverture du solide</em> <output id="oth"></output></span>
+      <input id="sth" type="range" min="0" max="90" step="1" value="90"></label>
+  </div>
+
+  <p class="formula">Volume du disque : <i>dV</i> = π <i>f(x)</i>² · <i>dx</i> ≈ <span class="v" id="dv"></span>,
+    d'où <i>V</i> = ∫<sub><i>a</i></sub><sup><i>b</i></sup> π <i>f(x)</i>² d<i>x</i>.</p>
+
+  <footer>Ici <i>a</i> = 1, <i>b</i> = 3 et <i>f(x)</i> = 0,35 + 2,1 e<sup>−(x−1)</sup>. Projection oblique : l'axe <i>x</i> est la même droite dans les deux panneaux et toutes les longueurs le long de l'axe sont à la même échelle.</footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  const a = 1, b = 3;
+  const f  = r => 0.35 + 2.1 * Math.exp(-(r - a));
+  const fp = r => -2.1 * Math.exp(-(r - a));          // f'
+  const KX = 0.433, KY = 0.25;                          // depth offset (back = up-right)
+  const M = Math.sqrt(1 + KY * KY), BETA = Math.atan2(1, KY);
+  const D = Math.PI / 180, TWO_PI = 2 * Math.PI, OV = 2 * D;
+  const LW = 0.02, LW_THIN = 0.013, SHIFT = 7.6;
+
+  const svg = document.getElementById("fig");
+  const NS = "http://www.w3.org/2000/svg";
+
+  // point at axial position X, radius rho, angle psi about the x-axis (psi = 0 is "up")
+  const P = (X, rho, psi) => [X + KX * rho * Math.sin(psi) + SHIFT, -(rho * Math.cos(psi) + KY * rho * Math.sin(psi))];
+  const lin = (u, v, n) => Array.from({ length: n }, (_, i) => u + (v - u) * i / (n - 1));
+  const rev = arr => arr.slice().reverse();
+
+  // silhouette of the outer surface: normal·view = 0  <=>  cos(psi + beta) = f'(x) KX / M
+  const sil1 = x => Math.acos(fp(x) * KX / M) - BETA;            // upper silhouette
+  const sil2 = x => TWO_PI - Math.acos(fp(x) * KX / M) - BETA;   // lower silhouette
+
+  // removed wedge [psi1, psi2]: keeps both cut faces turned toward the viewer
+  const wedge = theta => { const w = 12 * (1 - theta / 90); return [(270 + w) * D, (270 + w + theta) * D]; };
+  // at 90° the upper face is the vertical plane: an undistorted copy of the 2D region
+
+  const pts = arr => arr.map(p => p[0].toFixed(4) + "," + p[1].toFixed(4)).join(" ");
+  function poly(arr, fill) { const el = document.createElementNS(NS, "polygon"); el.setAttribute("points", pts(arr)); el.setAttribute("fill", fill); svg.appendChild(el); }
+  function line(arr, w, close) {
+    const el = document.createElementNS(NS, close ? "polygon" : "polyline");
+    el.setAttribute("points", pts(arr)); el.setAttribute("fill", "none"); el.setAttribute("stroke", "var(--line)");
+    el.setAttribute("stroke-width", w || LW); el.setAttribute("stroke-linecap", "round"); el.setAttribute("stroke-linejoin", "round");
+    svg.appendChild(el);
+  }
+  function text(x, y, s, anchor, baseline, halo) {
+    const el = document.createElementNS(NS, "text"); el.setAttribute("x", x); el.setAttribute("y", y);
+    if (halo) el.setAttribute("class", "halo");
+    el.setAttribute("text-anchor", anchor || "middle"); el.setAttribute("dominant-baseline", baseline || "middle");
+    el.textContent = s; svg.appendChild(el);
+  }
+  const L = (x, y) => [x, -y];
+
+  // visible outer-surface pieces between axial positions xa..xb
+  function lower(xa, xb, psi1) {      // psi from sil2(x) up to psi1
+    const xs = lin(xa, xb, 60);
+    return [].concat(
+      xs.map(x => P(x, f(x), sil2(x))),
+      lin(sil2(xb), psi1, 60).map(s => P(xb, f(xb), s)),
+      rev(xs).map(x => P(x, f(x), psi1)),
+      lin(psi1, sil2(xa), 60).map(s => P(xa, f(xa), s)));
+  }
+  function upper(xa, xb, psi2) {      // psi from psi2 up to sil1(x) + 2π
+    const xs = lin(xa, xb, 60);
+    return [].concat(
+      xs.map(x => P(x, f(x), sil1(x) + TWO_PI)),
+      lin(sil1(xb) + TWO_PI, psi2, 90).map(s => P(xb, f(xb), s)),
+      rev(xs).map(x => P(x, f(x), psi2)),
+      lin(psi2, sil1(xa) + TWO_PI, 90).map(s => P(xa, f(xa), s)));
+  }
+  function face(psi, r0, r1) {
+    const xs = lin(r0, r1, 60);
+    return [].concat(xs.map(x => P(x, 0, psi)), rev(xs).map(x => P(x, f(x), psi)));
+  }
+  function cap(X, p0, p1) { return [P(X, 0, 0)].concat(lin(p0, p1, 160).map(s => P(X, f(X), s))); }
+
+  function draw(x0, dx, theta) {
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    const XL = -3.6, XR = 3.8, YB = -2.9, YT = 3.4;
+    const x1 = x0 + dx, cut = theta >= 4;
+    let [psi1, psi2] = wedge(theta);
+    if (!cut) { psi1 = psi2 = (270 + 12) * D; }
+
+    /* ===================== LEFT: the plane region ===================== */
+    const xs = lin(a, b, 150);
+    poly([].concat(xs.map(x => L(x, 0)), rev(xs).map(x => L(x, f(x)))), "var(--light)");
+    const strip = [L(x0, 0), L(x1, 0), L(x1, f(x0)), L(x0, f(x0))];
+    poly(strip, "var(--orange)"); line(strip, LW, true);
+    line(xs.map(x => L(x, f(x))), 0.03);
+    line([L(a, 0), L(a, f(a))]); line([L(b, 0), L(b, f(b))]);
+    line([L(XL + 0.3, 0), L(XR - 0.3, 0)]); line([L(0, YB + 0.4), L(0, YT - 0.3)]);
+    line([L(a, -0.07), L(a, 0.07)]); line([L(b, -0.07), L(b, 0.07)]);
+    text(XR - 0.25, 0.35, "x", "middle", "hanging");
+    text(0.18, -(YT - 0.3), "y", "start", "hanging");
+    text(-0.15, 0.15, "0", "end", "hanging");
+    text(a, 0.2, "a", "middle", "hanging"); text(b, 0.2, "b", "middle", "hanging");
+    text(x0, 0.2, "x", "middle", "hanging");
+    text(x0 + dx / 2, -(f(x0) + 0.12), "dx", "middle", "auto");
+    text(1.05, -(f(1.05) + 0.18), "y = f(x)", "start", "auto");
+
+    /* ============ RIGHT: solid about the x-axis, wedge removed ============ */
+    // axes behind the solid
+    line([[SHIFT, -(YB + 0.4)], [SHIFT, -(YT - 0.3)]]);
+    const hid = KX * f(a) / M;                       // axis hidden behind the flared end
+    line([[SHIFT + XL + 0.3, 0], [SHIFT + a - hid, 0]]);
+
+    // 1. lower visible surface + its orange band
+    poly(lower(a, b, psi1 + (cut ? 0 : OV)), "var(--med)");
+    poly(lower(x0, x1, psi1 + (cut ? 0 : OV)), "var(--orange)");
+    // 2. upper visible surface + band
+    poly(upper(a, b, psi2), "var(--med)");
+    poly(upper(x0, x1, psi2), "var(--orange)");
+    // outlines of the surface
+    const xsr = lin(a, b, 80);
+    line(xsr.map(x => P(x, f(x), sil2(x))));                                   // lower silhouette
+    line(xsr.map(x => P(x, f(x), sil1(x) + TWO_PI)));                          // upper silhouette
+    line(lin(sil2(a), psi1, 60).map(s => P(a, f(a), s)));                      // far rim, lower part
+    line(lin(psi2, sil1(a) + TWO_PI, 90).map(s => P(a, f(a), s)));            // far rim, upper part
+    [x0, x1].forEach(r => {
+      line(lin(sil2(r), psi1, 40).map(s => P(r, f(r), s)), LW_THIN);
+      line(lin(psi2, sil1(r) + TWO_PI, 60).map(s => P(r, f(r), s)), LW_THIN);
+    });
+    // 3. flat end at x = b
+    poly(cap(b, psi2, psi1 + TWO_PI), "var(--light)");
+    line(lin(psi2, psi1 + TWO_PI, 160).map(s => P(b, f(b), s)));
+    // 4. cut faces with the disk's cross-section
+    if (cut) [psi1, psi2].forEach(psi => {
+      poly(face(psi, a, b), "var(--dark)"); poly(face(psi, x0, x1), "var(--orange)");
+      line(face(psi, a, b), LW, true);
+      line([P(x0, 0, psi), P(x0, f(x0), psi)], LW_THIN); line([P(x1, 0, psi), P(x1, f(x1), psi)], LW_THIN);
+    });
+    // 5. axis in front: crease of the wedge and beyond the solid
+    line([[SHIFT + (cut ? a : b), 0], [SHIFT + XR - 0.3, 0]]);
+    text(SHIFT + XR - 0.25, 0.35, "x", "middle", "hanging");
+    text(SHIFT + 0.18, -(YT - 0.3), "y", "start", "hanging");
+    text(SHIFT - 0.15, 0.15, "0", "end", "hanging");
+    // labels along the axis, as in the left panel (haloed where they cross a face)
+    [[a, "a"], [x0, "x"], [b, "b"]].forEach(([x, s]) => text(SHIFT + x, 0.2, s, "middle", "hanging", true));
+    if (theta >= 25) {
+      const pf = P(x1, f(x0) / 2, psi2);
+      text(pf[0] + 0.14, pf[1], "f(x)", "start", "middle", true);
+    }
+    const pd = P(x0 + dx / 2, f(x0 + dx / 2), sil1(x0 + dx / 2) + TWO_PI);
+    text(pd[0], pd[1] - 0.12, "dx", "middle", "auto", true);
+
+    const fr = n => n.toLocaleString("fr-CA", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById("ox").value = fr(x0);
+    document.getElementById("odx").value = fr(dx);
+    document.getElementById("oth").value = theta + "°";
+    document.getElementById("dv").textContent = fr(Math.PI * f(x0) * f(x0) * dx);
+  }
+
+  const sx = document.getElementById("sx"), sdx = document.getElementById("sdx"), sth = document.getElementById("sth");
+  const update = () => {
+    const x0 = parseFloat(sx.value), dx = Math.min(parseFloat(sdx.value), b - x0);
+    draw(x0, dx, parseInt(sth.value, 10));
+  };
+  [sx, sdx, sth].forEach(el => el.addEventListener("input", update));
+  update();
+})();
+</script>
+</body>
+</html>
