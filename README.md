@@ -1,64 +1,88 @@
-# Méthode des coquilles cylindriques
+# Volumes de révolution : coquilles et disques
 
-Diagramme pédagogique illustrant la **méthode des coquilles** pour le calcul
-des volumes de révolution : on fait tourner une région plane autour de
-l'axe *y* et on intègre de fines coquilles cylindriques.
+Deux diagrammes pédagogiques interactifs sur les volumes de révolution,
+construits à partir d'**une même région plane** : la région sous la courbe
+*y = f(x)* pour *a ≤ x ≤ b*, avec une bande verticale orange de largeur *dx*
+à la position *x*.
 
-- **Panneau de gauche** : la région sous la courbe *y = f(x)*, pour *a ≤ x ≤ b*,
-  avec une bande verticale orange de largeur *dx* à distance *x* de l'axe.
-- **Panneau de droite** : le solide obtenu par une rotation complète de cette
-  région autour de l'axe *y*, dessiné avec une ouverture de 90° pour laisser
-  voir l'intérieur. La bande orange y est devenue une coquille cylindrique de
-  rayon intérieur *x*, de rayon extérieur *x + dx* et de hauteur *f(x)*.
+| Page | Axe de rotation | Ce que devient la bande | Formule |
+|---|---|---|---|
+| `coquilles.html` | axe *y* (bande parallèle à l'axe) | une coquille cylindrique de rayon *x*, de hauteur *f(x)* et d'épaisseur *dx* | *V* = ∫<sub>a</sub><sup>b</sup> 2π *x f(x)* d*x* |
+| `disques.html` | axe *x* (bande perpendiculaire à l'axe) | un disque plein de rayon *f(x)* et d'épaisseur *dx* | *V* = ∫<sub>a</sub><sup>b</sup> π *f(x)*² d*x* |
 
-L'axe *y* est la même droite dans les deux panneaux et toutes les hauteurs sont
-à la même échelle : la correspondance entre la bande et la coquille se lit
-directement.
+Dans chaque page, trois glissières font varier la position *x* de la bande,
+son épaisseur *dx* et l'ouverture du solide (de 0°, solide complet, à 90°),
+et le volume de l'élément orange se recalcule en direct. Le solide est ouvert
+uniquement pour laisser voir l'intérieur ; la géométrie reste celle de la
+rotation complète.
 
-Volume d'une coquille : *dV* = 2π *x* · *f(x)* · *dx*, d'où
-*V* = ∫<sub>a</sub><sup>b</sup> 2π *x f(x)* d*x*.
+Le point pédagogique : ce qui fixe la méthode n'est pas l'axe en soi mais
+l'orientation de la tranche par rapport à lui. Parallèle à l'axe, elle engendre
+une coquille ; perpendiculaire, un disque. La région étant décrite par
+*y = f(x)*, les tranches verticales sont les plus naturelles dans les deux cas.
 
 ## Contenu du dépôt
 
 | Fichier | Rôle |
 |---|---|
-| `index.html` | Page web autonome et interactive : deux glissières font varier *x* et *dx*, le dessin et le volume de la coquille se mettent à jour en direct. Aucune dépendance (une seule police Google Fonts, avec repli système). |
-| `shell_method_diagram.py` | Script Python (numpy + matplotlib) qui produit le même diagramme en vectoriel : `shell_method.svg`, `shell_method.pdf` et `shell_method.png`. |
-| `shell_method.svg` | Le diagramme vectoriel prêt à insérer dans un document. |
+| `index.html` | Page d'accueil reliant les deux diagrammes. |
+| `coquilles.html` | Méthode des coquilles, page autonome et interactive. |
+| `disques.html` | Méthode des disques, page autonome et interactive. |
+| `python/shell_method_diagram.py` | Script Python (numpy + matplotlib) produisant le diagramme des coquilles en vectoriel (`shell_method.svg`, `.pdf`, `.png`). |
+| `python/disk_method_diagram.py` | Idem pour la méthode des disques (`disk_method.svg`, `.pdf`, `.png`). |
+| `python/*.svg` | Les diagrammes vectoriels prêts à insérer dans un document. |
 
-## Voir la page en ligne
+Les pages web n'ont aucune dépendance (une seule police Google Fonts, avec
+repli sur les polices du système) et s'ouvrent aussi bien en local qu'en ligne.
 
-La page est publiée avec GitHub Pages : ouvrez simplement l'adresse du dépôt
-sous la forme `https://<utilisateur>.github.io/<dépôt>/`.
+## Voir les pages en ligne
 
-## Produire le diagramme avec Python
+Le dépôt est publié avec GitHub Pages : ouvrez
+`https://<utilisateur>.github.io/<dépôt>/` pour l'accueil, ou directement
+`…/coquilles.html` et `…/disques.html`.
+
+## Produire les diagrammes avec Python
 
 ```bash
 pip install numpy matplotlib
+cd python
 python shell_method_diagram.py
+python disk_method_diagram.py
 ```
 
-Les paramètres sont regroupés en tête du script : bornes `a` et `b`, position
-`x0` et épaisseur `dx` de la bande, fonction `f`, angle d'élévation `E`,
-angles de la découpe `PHI1`/`PHI2` et palette de couleurs.
+Les paramètres sont regroupés en tête de chaque script : bornes `a` et `b`,
+position `x0` et épaisseur `dx` de la bande, fonction `f`, angle d'ouverture
+du solide et palette de couleurs.
 
-## Comment le dessin est construit
+## Comment les dessins sont construits
 
-Le panneau de droite est une projection oblique du solide en coordonnées
-cylindriques (*r*, φ, *y*) :
+Les deux panneaux de droite sont des projections obliques du solide en
+coordonnées cylindriques autour de l'axe de rotation. Pour les coquilles
+(axe vertical) :
 
 ```
 x_écran = r · cos φ
 y_écran = y + E · r · sin φ
 ```
 
-Les surfaces (paroi intérieure, surface courbe supérieure, faces de coupe,
-paroi extérieure) sont peintes de l'arrière vers l'avant. La coquille orange est
-tracée là où elle est réellement visible : sur la surface supérieure et en
-section sur les deux faces de coupe.
+Pour les disques (axe horizontal, ψ = 0 vers le haut) :
+
+```
+x_écran = x + Kx · ρ · sin ψ
+y_écran = ρ · cos ψ + Ky · ρ · sin ψ
+```
+
+Dans les deux cas l'axe de rotation est la même droite que dans le panneau
+de gauche, et les longueurs le long de l'axe sont à la même échelle. Les
+surfaces sont peintes de l'arrière vers l'avant ; pour les disques, la partie
+visible de la surface extérieure est délimitée par sa silhouette, calculée
+analytiquement (normale · direction de vue = 0). L'élément orange est tracé là
+où il est réellement visible : sur la surface extérieure et en section sur les
+faces de coupe. À 90° d'ouverture, une face de coupe est une copie non
+déformée de la région plane, ce qui rend la correspondance immédiate.
 
 ## Crédits
 
-Diagramme, script Python et page interactive conçus et réalisés par
+Diagrammes, scripts Python et pages interactives conçus et réalisés par
 [Claude](https://claude.ai), l'assistant d'Anthropic, à partir d'un cahier des
-charges rédigé par l'autrice du dépôt.
+charges rédigé par l'autrice du dépôt, pour une amie enseignante.
