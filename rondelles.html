@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Méthode des disques</title>
+<title>Méthode des disques troués</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -43,12 +43,12 @@
 </head>
 <body>
 <main>
-  <nav><a href="index.html">Solides de révolution</a> · <a href="tubes.html">Méthode des tubes</a> · Méthode des disques · <a href="rondelles.html">Méthode des disques troués</a></nav>
-  <h1>Méthode des disques</h1>
-  <p class="lead">La même région bleue tourne cette fois autour de l'axe <i>x</i>. La bande orange de largeur d<i>x</i>, perpendiculaire à l'axe, devient un disque plein de rayon <i>f</i>(<i>x</i>) et d'épaisseur d<i>x</i>. Le solide peut être ouvert jusqu'à 90° pour laisser voir l'intérieur ; la géométrie reste celle de la rotation complète.</p>
+  <nav><a href="index.html">Solides de révolution</a> · <a href="tubes.html">Méthode des tubes</a> · <a href="disques.html">Méthode des disques</a> · Méthode des disques troués</nav>
+  <h1>Méthode des disques troués</h1>
+  <p class="lead">La même région bleue tourne cette fois autour de la droite <i>y</i> = −1, située sous la région. La bande orange de largeur d<i>x</i> devient un disque troué : un anneau de rayon extérieur <i>R</i> = <i>f</i>(<i>x</i>) + 1, de rayon intérieur <i>r</i> = 1 et d'épaisseur d<i>x</i>. Le solide est percé d'un trou cylindrique de rayon 1 le long de l'axe. Il peut être ouvert jusqu'à 90° pour laisser voir l'intérieur ; la géométrie reste celle de la rotation complète.</p>
 
   <figure>
-    <svg id="fig" viewBox="-3.6 -3.4 15.3 6.3" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Région plane à gauche, solide de révolution autour de l'axe x avec disque à droite"></svg>
+    <svg id="fig" viewBox="-3.6 -3.4 15.3 8.2" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Région plane à gauche, solide de révolution autour de la droite y = −1 avec disque troué à droite"></svg>
   </figure>
 
   <div class="controls">
@@ -60,8 +60,8 @@
       <input id="sth" type="range" min="0" max="90" step="1" value="90"></label>
   </div>
 
-  <p class="formula">Volume du disque : d<i>V</i> = π <i>f</i>(<i>x</i>)² · d<i>x</i> ≈ <span class="v" id="dv"></span>,
-    d'où <i>V</i> = ∫<sub><i>a</i></sub><sup><i>b</i></sup> π <i>f</i>(<i>x</i>)² d<i>x</i>.</p>
+  <p class="formula">Volume du disque troué : d<i>V</i> = π(<i>R</i>² − <i>r</i>²) · d<i>x</i> ≈ <span class="v" id="dv"></span>,
+    d'où <i>V</i> = ∫<sub><i>a</i></sub><sup><i>b</i></sup> π[(<i>f</i>(<i>x</i>) + 1)² − 1²] d<i>x</i>.</p>
 
   <footer>Ici <i>a</i> = 1, <i>b</i> = 3 et <i>f</i>(<i>x</i>) = 0,35 + 2,1 e<sup>−(x−1)</sup>. Projection oblique : l'axe de rotation est la même droite dans les deux panneaux et toutes les longueurs le long de l'axe sont à la même échelle. Le solide est peint en fines tranches de l'arrière vers l'avant, et chaque contour n'est tracé que là où il est réellement visible.</footer>
 </main>
@@ -70,7 +70,7 @@
 (function () {
   "use strict";
   const a = 1, b = 3;
-  const C = 0;                                       // axis of revolution: y = C
+  const C = -1;                                       // axis of revolution: y = C
   const R0 = 0 - C;                                      // inner radius (0: no hole)
   const f  = r => 0.35 + 2.1 * Math.exp(-(r - a));
   const fp = r => -2.1 * Math.exp(-(r - a));
@@ -80,7 +80,7 @@
   const D = Math.PI / 180, TWO_PI = 2 * Math.PI;
   const LW = 0.02, LW_THIN = 0.013, SHIFT = 7.6;
   const PSA = Math.atan(KY), PSB = PSA + Math.PI;        // hole wall: half that faces the viewer
-  const YB = -2.9, YT = 3.4, XL = -3.6, XR = 3.8;
+  const YB = -4.8, YT = 3.4, XL = -3.6, XR = 3.8;
 
   const svg = document.getElementById("fig");
   const NS = "http://www.w3.org/2000/svg";
@@ -211,8 +211,9 @@
     if (C !== 0) text(SHIFT + XL + 0.3, -C + 0.12, "y = " + C, "start", "hanging");
     [[a, "a"], [x0, "x"], [b, "b"]].forEach(([x, s]) => text(SHIFT + x, 0.2, s, "middle", "hanging", true));
     if (theta >= 45) {
-      const pf = P(x1, f(x0) / 2, psi2);
-      text(pf[0] + 0.14, pf[1], "f(x)", "start", "middle", true);
+      const pR = P(x1, R0 + f(x0) / 2, psi2), pr = P(x0, R0 / 4, psi2);
+      text(pR[0] + 0.14, pR[1], "R", "start", "middle", true);
+      text(pr[0] - 0.14, pr[1], "r", "end", "middle", true);
     }
     const xm = x0 + dx / 2, pd = P(xm, F(xm), sil1(xm) + TWO_PI);
     text(pd[0], pd[1] - 0.12, "dx", "middle", "auto", true);

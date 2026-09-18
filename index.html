@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Volumes de révolution — coquilles et disques</title>
+<title>Solides de révolution — tubes, disques et disques troués</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -14,10 +14,10 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--bg); color: var(--ink); }
   body { font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif; font-size: 18px; line-height: 1.45; }
-  main { max-width: 900px; margin: 0 auto; padding: 48px 20px 56px; }
+  main { max-width: 1120px; margin: 0 auto; padding: 48px 20px 56px; }
   h1 { font-weight: 600; font-size: 2rem; margin: 0 0 6px; letter-spacing: -0.01em; }
   .lead { margin: 0 0 32px; color: var(--muted); max-width: 60ch; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
   a.card { display: block; text-decoration: none; color: inherit; border: 1px solid var(--rule); padding: 22px 24px 20px; }
   a.card:hover { border-color: var(--dark); }
   a.card h2 { font-size: 1.25rem; font-weight: 600; margin: 12px 0 6px; color: var(--dark); }
@@ -29,11 +29,11 @@
 </head>
 <body>
 <main>
-  <h1>Volumes de révolution</h1>
-  <p class="lead">Une même région plane, sous la courbe <i>y = f(x)</i> entre <i>a</i> et <i>b</i>, et une même bande verticale orange de largeur <i>dx</i>. Selon l'axe autour duquel on fait tourner la région, cette bande devient une coquille creuse ou un disque plein. Deux pages interactives pour le voir.</p>
+  <h1>Solides de révolution</h1>
+  <p class="lead">Une même région plane, sous la courbe <i>y</i> = <i>f</i>(<i>x</i>) entre <i>a</i> et <i>b</i>, et une même bande verticale orange de largeur d<i>x</i>. Selon l'axe autour duquel on fait tourner la région, cette bande devient un tube, un disque plein ou un disque troué. Trois pages interactives pour le voir, et pour calculer le volume du solide engendré.</p>
 
   <div class="cards">
-    <a class="card" href="coquilles.html">
+    <a class="card" href="tubes.html">
       <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <line x1="150" y1="6" x2="150" y2="124" stroke="#000" stroke-width="1"/>
         <path d="M 60 70 A 90 34 0 0 0 240 70 L 240 60 A 90 34 0 0 1 60 60 Z" fill="#5FA8E0" stroke="#000" stroke-width="1"/>
@@ -44,9 +44,9 @@
         <path d="M 110 60 A 40 15 0 0 0 190 60 L 190 40 A 40 15 0 0 0 110 40 Z" fill="#BFDCF5" stroke="#000" stroke-width="0.8"/>
         <path d="M 110 40 A 40 15 0 0 1 190 40 A 40 15 0 0 1 110 40 Z" fill="#BFDCF5" stroke="#000" stroke-width="0.8"/>
       </svg>
-      <h2>Méthode des coquilles</h2>
-      <p>Rotation autour de l'axe <i>y</i>. La bande, parallèle à l'axe, balaie une coquille cylindrique de rayon <i>x</i>, de hauteur <i>f(x)</i> et d'épaisseur <i>dx</i>.</p>
-      <p class="formula"><i>V</i> = ∫<sub><i>a</i></sub><sup><i>b</i></sup> 2π<i>x f(x)</i> d<i>x</i></p>
+      <h2>Méthode des tubes</h2>
+      <p>Rotation autour de l'axe <i>y</i>. La bande, parallèle à l'axe, balaie un tube de rayon <i>x</i>, de hauteur <i>f</i>(<i>x</i>) et d'épaisseur d<i>x</i>.</p>
+      <p class="formula"><i>V</i> = ∫<sub><i>a</i></sub><sup><i>b</i></sup> 2π<i>x f</i>(<i>x</i>) d<i>x</i></p>
     </a>
 
     <a class="card" href="disques.html">
@@ -59,12 +59,27 @@
         <ellipse cx="130" cy="65.5" rx="10" ry="30" fill="#F28C28" stroke="#000" stroke-width="0.8"/>
       </svg>
       <h2>Méthode des disques</h2>
-      <p>Rotation autour de l'axe <i>x</i>. La bande, perpendiculaire à l'axe, balaie un disque plein de rayon <i>f(x)</i> et d'épaisseur <i>dx</i>.</p>
-      <p class="formula"><i>V</i> = ∫<sub><i>a</i></sub><sup><i>b</i></sup> π <i>f(x)</i>² d<i>x</i></p>
+      <p>Rotation autour de l'axe <i>x</i>. La bande, perpendiculaire à l'axe, balaie un disque plein de rayon <i>f</i>(<i>x</i>) et d'épaisseur d<i>x</i>.</p>
+      <p class="formula"><i>V</i> = ∫<sub><i>a</i></sub><sup><i>b</i></sup> π <i>f</i>(<i>x</i>)² d<i>x</i></p>
+    </a>
+    <a class="card" href="rondelles.html">
+      <svg viewBox="0 0 300 176" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <line x1="6" y1="88" x2="294" y2="88" stroke="#000" stroke-width="1"/>
+        <path d="M 60 12 C 110 40 150 55 250 62 L 250 114 C 150 121 110 136 60 164 Z" fill="#5FA8E0" stroke="#000" stroke-width="1"/>
+        <path d="M 60 12 A 14 76 0 0 0 60 164 A 14 76 0 0 0 60 12 Z" fill="#5FA8E0" stroke="#000" stroke-width="1"/>
+        <ellipse cx="250" cy="88" rx="7" ry="26" fill="#BFDCF5" stroke="#000" stroke-width="1"/>
+        <ellipse cx="250" cy="88" rx="3.5" ry="13" fill="#ffffff" stroke="#000" stroke-width="0.8"/>
+        <path d="M 130 42 A 10 46 0 0 0 130 134 L 142 132 A 10 44 0 0 0 142 44 Z" fill="#F28C28" stroke="#000" stroke-width="0.8"/>
+        <ellipse cx="130" cy="88" rx="10" ry="43" fill="#F28C28" stroke="#000" stroke-width="0.8"/>
+        <ellipse cx="130" cy="88" rx="4" ry="14" fill="#BFDCF5" stroke="#000" stroke-width="0.8"/>
+      </svg>
+      <h2>Méthode des disques troués</h2>
+      <p>Rotation autour de la droite <i>y</i> = −1. La bande balaie un disque troué de rayon extérieur <i>R</i> = <i>f</i>(<i>x</i>) + 1, de rayon intérieur <i>r</i> = 1 et d'épaisseur d<i>x</i>.</p>
+      <p class="formula"><i>V</i> = ∫<sub><i>a</i></sub><sup><i>b</i></sup> π(<i>R</i>² − <i>r</i>²) d<i>x</i></p>
     </a>
   </div>
 
-  <footer>Ce qui fixe la méthode, ce n'est pas l'axe en soi mais l'orientation de la tranche par rapport à lui : parallèle à l'axe, elle engendre une coquille ; perpendiculaire, un disque. La région étant décrite par <i>y = f(x)</i>, les tranches verticales sont les plus naturelles dans les deux cas.</footer>
+  <footer>Ce qui fixe la méthode, ce n'est pas l'axe en soi mais l'orientation de la tranche par rapport à lui : parallèle à l'axe, elle engendre un tube ; perpendiculaire, un disque (plein ou troué). La région étant décrite par <i>y</i> = <i>f</i>(<i>x</i>), les tranches verticales sont les plus naturelles dans les trois cas. Un volume est une mesure : c'est le solide qui est de révolution, et son volume que l'on calcule.</footer>
 </main>
 </body>
 </html>
